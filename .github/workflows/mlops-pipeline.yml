@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11.9"
 
@@ -31,7 +31,6 @@ jobs:
         run: |
           python src/data/run_processing.py --input data/raw/house_data.csv --output data/processed/cleaned_house_data.csv
 
-      # Gate 1 (guía 1): si los datos limpios no cumplen el data contract, el pipeline se detiene aquí
       - name: Validate data contract
         run: |
           python src/data/validate.py --input data/processed/cleaned_house_data.csv
@@ -49,10 +48,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11.9"
 
@@ -71,3 +70,15 @@ jobs:
         run: |
           mkdir -p models/trained
           python src/features/engineer.py --input data/processed/cleaned_house_data.csv --output data/processed/featured_house_data.csv --preprocessor models/trained/preprocessor.pkl
+
+      - name: Upload featured data
+        uses: actions/upload-artifact@v4
+        with:
+          name: featured-data
+          path: data/processed/featured_house_data.csv
+
+      - name: Upload preprocessor
+        uses: actions/upload-artifact@v4
+        with:
+          name: preprocessor
+          path: models/trained/preprocessor.pkl
