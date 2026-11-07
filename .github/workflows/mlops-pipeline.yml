@@ -82,3 +82,65 @@ jobs:
         with:
           name: preprocessor
           path: models/trained/preprocessor.pkl
+  
+  model-training:
+    name: Model Training
+    needs: feature-engineering
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download processed data
+        uses: actions/download-artifact@v4
+        with:
+          name: processed-data
+          path: data/processed/
+
+      - name: Download featured data
+        uses: actions/download-artifact@v4
+        with:
+          name: featured-data
+          path: data/processed/
+
+      - name: Set up MLflow
+        run: |
+          docker run -d -p 5000:5000 --name mlflow-server ghcr.io/mlflow/mlflow:v2.22.1 \
+            mlflow server --host 0.0.0.0 --backend-store-uri sqlite:///mlflow.db --artifacts-destination /tmp/mlartifacts
+
+      - name: Wait for MLflow to start
+        run: |
+          for i in {1..20}; do
+            curl -fs http://localhost:5000/health && break || sleep 3
+          done
+          curl -f http://localhost:5000/health
+
+      - name: Train model
+        run: |
+          mkdir -p models
+          python src/models/train_model.py --config configs/model_config.yaml --data data/processed/featured_house_data.csv --models-dir models --mlflow-tracking-uri http://localhost:5000
+
+      - name: Upload trained model
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: |
+            models/trained/house_price_model.pkl
+            models/trained/house_price_model.yaml
+
+      - name: Clean up MLflow
+        if: always()
+        run: |
+          docker stop mlflow-server || true
+          docker rm mlflow-server || true
