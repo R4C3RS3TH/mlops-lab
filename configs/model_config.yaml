@@ -1,5 +1,5 @@
 model:
-  best_model: RandomForest
+  best_model: GradientBoosting
   feature_sets:
     rfe:
     - num__sqft
@@ -15,30 +15,33 @@ model:
     rfe_method: RandomForestRegressor
     selected_features_count: 10
     total_features: 15
-  mae: 21252.29166666667
+  mae: 17728.197017273487
   name: house_price_model
   parameters:
-    bootstrap: true
+    alpha: 0.9
     ccp_alpha: 0.0
-    criterion: squared_error
-    max_depth: null
-    max_features: 1.0
+    criterion: friedman_mse
+    init: null
+    learning_rate: 0.2
+    loss: squared_error
+    max_depth: 10
+    max_features: null
     max_leaf_nodes: null
-    max_samples: null
     min_impurity_decrease: 0.0
     min_samples_leaf: 1
     min_samples_split: 2
     min_weight_fraction_leaf: 0.0
-    monotonic_cst: null
-    n_estimators: 50
-    n_jobs: null
-    oob_score: false
+    n_estimators: 200
+    n_iter_no_change: null
     random_state: null
+    subsample: 0.8
+    tol: 0.0001
+    validation_fraction: 0.1
     verbose: 0
     warm_start: false
   quality_gate:
     max_mape: 0.1
     min_r2: 0.9
     must_beat_baseline: true
-  r2_score: 0.9691087719321786
+  r2_score: 0.9720360853021877
   target_variable: price
