@@ -41,7 +41,7 @@ model:
     warm_start: false
   quality_gate:
     max_mape: 0.1
-    min_r2: 0.9
+    min_r2: 0.99
     must_beat_baseline: true
   r2_score: 0.9720360853021877
   target_variable: price
